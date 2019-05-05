@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!-- 加载数据库参数配置文件 -->
+    <context:property-placeholder location="classpath:/app.properties" />
+
+    <!-- 初始化数据源 -->
+    <bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource">
+        <property name="jdbcUrl" value="${jdbc.url}" />
+        <property name="driverClassName" value="${jdbc.driver}" />
+        <property name="username" value="${jdbc.user}" />
+        <property name="password" value="${jdbc.password}" />
+        <property name="maximumPoolSize" value="10" />
+        <property name="minimumIdle" value="3" />
+        <property name="dataSourceProperties" value="#{{cachePrepStmts: true, prepStmtCacheSize: 250, prepStmtCacheSqlLimit: 2048}}" />
+    </bean>
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <!--<bean id="userRepository" class="org.aron.springTest.repository.UserRepository">-->
+    <!--    <property name="jdbcTemplate" ref="jdbcTemplate" />-->
+    <!--</bean>-->
+
+    <!--<bean class="org.aron.springTest.service.impl.UserServiceImpl" id="userService">-->
+    <!--    <property name="userRepository" ref="userRepository" />-->
+    <!--</bean>-->
+
+    <!-- 1.配置事务管理器 -->
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!-- 2.配置事务管理增强 -->
+    <tx:advice id="txAdvice" transaction-manager="txManager" >
+        <tx:attributes>
+            <!-- 代理的方法名称 -->
+            <tx:method name="*"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!-- 3.配置AOP，拦截什么方法(切入点表达) + 应用事务管理增强 -->
+    <aop:config>
+        <aop:pointcut id="pointcut" expression="execution(* org.aron.springTest.service..*())" />
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="pointcut"/>
+    </aop:config>
+</beans>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false" >
+
+    <property name="root" value="src/main/resources/logs" />
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <Pattern>%highlight(%d{HH:mm:ss.SSS}) %boldMagenta([%thread]) %highlight(%-5level) %green(%logger{36}.%M[%line]): %highlight(%msg%n)</Pattern>
+        </encoder>
+    </appender>
+
+    <!--<appender name="FILE" class="ch.qos.logback.org.aron.serverer.FileAppender">-->
+        <!--<file>${root}/test.log</file>-->
+        <!--<append>false</append>-->
+        <!--<encoder>-->
+            <!--<Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36}.%M[%line]: %msg%n</Pattern>-->
+        <!--</encoder>-->
+    <!--</appender>-->
+
+    <root level="debug">
+        <appender-ref ref="STDOUT" />
+        <!--<appender-ref ref="FILE" />-->
+    </root>
+</configuration>

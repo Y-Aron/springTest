@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <!-- bean的类名唯一，即IOC容器中不允许出现重复的类 -->
+
+    <!-- 无参构造函数创建对象 -->
+    <!--<bean id="user" class="org.aron.springTest.bean.User" />-->
+
+    <!-- 工厂的静态方法创建对象，class: 工厂类，factory-method: 静态方法 -->
+<!--    <bean id="user" class="org.aron.springTest.bean.UserFactory" factory-method="createStaticUser" />-->
+
+    <!-- 工厂的非静态方法创建对象 -->
+    <!-- 创建工厂类的bean -->
+<!--    <bean id="userFactory" class="org.aron.springTest.bean.UserFactory"/>-->
+    <!-- factory-bean：工厂类 factory-method: 非静态方法 -->
+<!--    <bean id="user" factory-bean="userFactory" factory-method="createUser"/>-->
+
+    <!--
+        使用c名称空间进行参数赋值
+        1. 导入c命名空间：<beans xmlns:c="http://www.springframework.org/schema/c"></beans>
+        2. 使用c命名空间配置构造函数的参数
+        3. c命名空间无法装配集合
+     -->
+<!--    <bean id="user1" class="org.aron.springTest.bean.User"-->
+<!--          c:password="passwd"-->
+<!--          c:role-ref="role"-->
+<!--          c:username="admin"/>-->
+
+    <!-- 带参数的构造函数创建对象 -->
+    <!-- bean参数介绍:
+        1. scope:
+            prototype: 多例对象, 对象在IOC容器之前就已经创建
+            singleton: 单例对象(默认值)，对象在使用时才创建
+        2. lazy-init:
+            true: 对象在使用时创建，只对单例对象有效(scope=singleton)
+            false: 对象在IOC容器之前就已经创建 默认值
+        3. init-method: 创建对象时初始化方法
+        4. destroy-method: 执行ClassPathXmlApplicationContext.close()时执行的方法。注意当scope=prototype时，是不会执行destroy-method
+     -->
+    <bean id="user" class="org.aron.springTest.bean.User" scope="prototype" destroy-method="destroy" lazy-init="true">
+        <!-- index: 参数在构造方法上的位置 -->
+        <!-- name: 参数名称 -->
+        <!-- type: 参数类型 -->
+        <!-- value: 参数值 -->
+        <constructor-arg index="0" name="username" type="java.lang.String" value="user" />
+        <constructor-arg index="1" name="password" type="java.lang.String" value="passwd" />
+        <!-- 当构造函数的值是一个对象，而不是一个普通类型的值时，使用ref属性关联bean对象 -->
+        <constructor-arg index="2" name="role" type="org.aron.springTest.bean.Role" ref="role" />
+
+<!--        普通值类型-->
+<!--        <property name="password" value="密码"/>-->
+<!--        特殊字符-->
+<!--        <property name="username">-->
+<!--            <value><![CDATA[测试]]></value>-->
+<!--        </property>-->
+<!--        引用类型-->
+<!--        <property name="role" ref="role" />-->
+
+        <!-- 装配数组 SpEL表达式语言定义数组 -->
+        <property name="array" value="#{{1,2,3,4,5}}">
+            <!-- 标签定义数组 -->
+<!--            <list>-->
+<!--                <value>array 111</value>-->
+<!--                <value>array 222</value>-->
+<!--                <value>array 333</value>-->
+<!--            </list>-->
+        </property>
+
+        <!-- 装配 List -->
+        <property name="interests" value="#{{'listValue1', 'listValue2', 'listValue3'}}">
+<!--            <list>-->
+<!--                <value>list aaa</value>-->
+<!--                <value>list bbb</value>-->
+<!--                <value>list ccc</value>-->
+<!--            </list>-->
+        </property>
+        <!-- 装配 Set -->
+        <property name="set" value="#{{'set1', 'set2', 'set3'}}">
+<!--            <set>-->
+<!--                <value>set 123</value>-->
+<!--                <value>set 456</value>-->
+<!--                <value>set 789</value>-->
+<!--            </set>-->
+        </property>
+
+        <!-- 装配 Map -->
+        <property name="map" value="#{{'key1': 'value1', key2: 'value2', key3: 'value3'}}">
+<!--            <map>-->
+<!--                <entry key="key1" value="value1" />-->
+<!--                <entry key="key2" value="value2" />-->
+<!--                <entry key="key3" value="value3" />-->
+<!--            </map>-->
+        </property>
+
+        <!-- 装配 Properties -->
+        <property name="properties" value="#{{ pk1: 'pv1', pk2: 'pv2' }}">
+<!--            <props>-->
+<!--                <prop key="propKet1">propValue1</prop>-->
+<!--                <prop key="propKet2">propValue2</prop>-->
+<!--                <prop key="propKet3">propValue3</prop>-->
+<!--            </props>-->
+        </property>
+    </bean>
+
+    <!--
+        util命名空间定义
+        1. 导入util命名空间: <beans xmlns:util="http://www.springframework.org/schema/util"
+                xsi:schemaLocation="http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"></beans>
+        2. Array/List/Set/Map/Properties等,用法与上述相同 -->
+    <util:list id="roleArray" value-type="java.lang.Integer">
+        <value>1</value>
+        <value>2</value>
+    </util:list>
+
+    <!-- 使用array-ref引用集合对象 -->
+    <bean id="role" class="org.aron.springTest.bean.Role" c:roleName="roleName" c:array-ref="roleArray"/>
+    <!--
+        p命名空间注入参数,
+        1. 导入p命名空间: <beans xmlns:p="http://www.springframework.org/schema/p"></beans>
+        2. 使用p:属性完整注入
+            |-值类型: p:属性名="值"
+            |-对象类型: p:属性名-ref="bean名称" -->
+    <bean id="sysadmin" class="org.aron.springTest.bean.Sysadmin"
+          p:nickname="#{user.username}"
+          p:role-ref="role"
+          p:sysAdmin="#{T(Math).random() + ' - 用户名'}"/>
+
+    <bean id="userController" class="org.aron.springTest.controller.UserController"/>
+</beans>
